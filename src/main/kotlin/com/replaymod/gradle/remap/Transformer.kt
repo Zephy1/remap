@@ -1,7 +1,13 @@
+@file:OptIn(
+    CompilerConfiguration.Internals::class,
+    K1Deprecation::class
+)
+@file:Suppress("DEPRECATION_ERROR")
 package com.replaymod.gradle.remap
 
 import com.replaymod.gradle.remap.legacy.LegacyMapping
 import org.cadixdev.lorenz.MappingSet
+import org.jetbrains.kotlin.K1Deprecation
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.config.ContentRoot
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
@@ -9,6 +15,10 @@ import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
+import org.jetbrains.kotlin.cli.jvm.compiler.NoScopeRecordCliBindingTrace
+import org.jetbrains.kotlin.cli.jvm.compiler.TopDownAnalyzerFacadeForJVM
+import org.jetbrains.kotlin.analyzer.AnalysisResult
+import org.jetbrains.kotlin.cli.common.config.KotlinSourceRoot
 import org.jetbrains.kotlin.cli.jvm.config.JavaSourceRoot
 import org.jetbrains.kotlin.cli.jvm.config.JvmClasspathRoot
 import org.jetbrains.kotlin.cli.jvm.modules.CoreJrtFileSystem
@@ -50,8 +60,7 @@ class Transformer(private val map: MappingSet) {
     var verboseCompilerMessages = false
 
     @Throws(IOException::class)
-    fun remap(sources: Map<String, String>): Map<String, Pair<String, List<Pair<Int, String>>>> =
-            remap(sources, emptyMap())
+    fun remap(sources: Map<String, String>): Map<String, Pair<String, List<Pair<Int, String>>>> = remap(sources, emptyMap())
 
     @Throws(IOException::class)
     fun remap(sources: Map<String, String>, processedSources: Map<String, String>): Map<String, Pair<String, List<Pair<Int, String>>>> {
@@ -77,7 +86,7 @@ class Transformer(private val map: MappingSet) {
             val kotlinSourceRoot = KotlinSourceRoot(tmpDir.toAbsolutePath().toString(), false, null)
             config.add<ContentRoot>(CLIConfigurationKeys.CONTENT_ROOTS, kotlinSourceRoot)
             config.addAll<ContentRoot>(CLIConfigurationKeys.CONTENT_ROOTS, classpath!!.map { JvmClasspathRoot(File(it)) })
-            config.put<MessageCollector>(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, PrintingMessageCollector(System.err, MessageRenderer.GRADLE_STYLE, verboseCompilerMessages))
+            config.put<MessageCollector>(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, PrintingMessageCollector(System.err, MessageRenderer.GRADLE_STYLE, verboseCompilerMessages))
 
             // Our PsiMapper only works with the PSI tree elements, not with the faster (but kotlin-specific) classes
             config.put(JVMConfigurationKeys.USE_PSI_CLASS_FILES_READING, true)
@@ -93,9 +102,9 @@ class Transformer(private val map: MappingSet) {
             loadedField.set(Registry.getInstance(), true)
 
             val environment = KotlinCoreEnvironment.createForProduction(
-                    disposable,
-                    config,
-                    EnvironmentConfigFiles.JVM_CONFIG_FILES
+                disposable,
+                config,
+                EnvironmentConfigFiles.JVM_CONFIG_FILES,
             )
             @Suppress("DEPRECATION")
             val rootArea = Extensions.getRootArea()
@@ -166,6 +175,17 @@ class Transformer(private val map: MappingSet) {
         }
     }
 
+    private fun analyze(environment: KotlinCoreEnvironment, ktFiles: List<KtFile>): AnalysisResult {
+        val trace = NoScopeRecordCliBindingTrace(environment.project)
+        return TopDownAnalyzerFacadeForJVM.analyzeFilesWithJavaIntegration(
+            environment.project,
+            ktFiles,
+            trace,
+            environment.configuration,
+            environment::createPackagePartProvider,
+        )
+    }
+
     private fun CompilerConfiguration.setupJdk(jdkHome: File) {
         put(JVMConfigurationKeys.JDK_HOME, jdkHome)
 
@@ -183,12 +203,12 @@ class Transformer(private val map: MappingSet) {
         if (manageImports) {
             config.add(CLIConfigurationKeys.CONTENT_ROOTS, JavaSourceRoot(sourceRoot.toFile(), ""))
         }
-        config.put(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, PrintingMessageCollector(System.err, MessageRenderer.GRADLE_STYLE, verboseCompilerMessages))
+        config.put(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, PrintingMessageCollector(System.err, MessageRenderer.GRADLE_STYLE, verboseCompilerMessages))
 
         val environment = KotlinCoreEnvironment.createForProduction(
             disposable,
             config,
-            EnvironmentConfigFiles.JVM_CONFIG_FILES
+            EnvironmentConfigFiles.JVM_CONFIG_FILES,
         )
         analyze(environment, emptyList())
         return environment
@@ -242,5 +262,4 @@ class Transformer(private val map: MappingSet) {
             }
         }
     }
-
 }
