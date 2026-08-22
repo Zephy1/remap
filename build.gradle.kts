@@ -1,11 +1,11 @@
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
-    kotlin("jvm") version "2.3.0"
+    kotlin("jvm") version "2.4.10"
     `maven-publish`
 }
 
-java.toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+java.toolchain.languageVersion.set(JavaLanguageVersion.of(25))
 
 group = "com.github.replaymod"
 version = "SNAPSHOT"
@@ -16,11 +16,11 @@ repositories {
 }
 
 dependencies {
-    api("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.5.21")
+    api("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.4.10")
     implementation(kotlin("stdlib"))
-    implementation("org.ow2.asm:asm-tree:9.9.1")
-    api("org.cadixdev:lorenz:0.5.0")
-    testRuntimeOnly("org.spongepowered:mixin:0.8.4")
+    implementation("org.ow2.asm:asm-tree:9.10.1")
+    api("org.cadixdev:lorenz:0.5.8")
+    testRuntimeOnly("org.spongepowered:mixin:0.8.7")
 }
 
 tasks.named<Jar>("jar") {
@@ -41,7 +41,7 @@ tasks.test {
 
 tasks.compileKotlin {
     compilerOptions {
-        apiVersion.set(KotlinVersion.KOTLIN_1_9)
-        languageVersion.set(KotlinVersion.KOTLIN_1_9)
+        apiVersion.set(KotlinVersion.KOTLIN_2_4)
+        languageVersion.set(KotlinVersion.KOTLIN_2_4)
     }
 }
