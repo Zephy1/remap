@@ -16,9 +16,6 @@ repositories {
     maven("https://repo.spongepowered.org/repository/maven-public/")
 }
 
-val testA by sourceSets.creating
-val testB by sourceSets.creating
-
 kotlinVersion("1.5.21", isPrimaryVersion = true)
 kotlinVersion("1.6.20")
 kotlinVersion("1.9.0")
@@ -29,13 +26,6 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation("org.ow2.asm:asm-tree:9.9.1")
     api("org.cadixdev:lorenz:0.5.0")
-    runtimeOnly("net.java.dev.jna:jna:5.10.0") // don't strictly need this but IDEA spams log without
-
-    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
-    testImplementation("io.kotest:kotest-assertions-core:4.6.3")
-
-    testRuntimeOnly(testA.output)
-    testRuntimeOnly(testB.output)
     testRuntimeOnly("org.spongepowered:mixin:0.8.4")
 }
 
