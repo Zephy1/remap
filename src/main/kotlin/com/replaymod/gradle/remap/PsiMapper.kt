@@ -1,3 +1,11 @@
+@file:OptIn(
+    K1Deprecation::class
+)
+@file:Suppress(
+    "DEPRECATION_ERROR",
+    "OPT_IN_USAGE_ERROR",
+    "OPT_IN_USAGE_FUTURE_ERROR"
+)
 package com.replaymod.gradle.remap
 
 import com.replaymod.gradle.remap.PsiUtils.getSignature
@@ -7,6 +15,7 @@ import org.cadixdev.lorenz.MappingSet
 import org.cadixdev.lorenz.model.ClassMapping
 import org.cadixdev.lorenz.model.FieldMapping
 import org.cadixdev.lorenz.model.MethodMapping
+import org.jetbrains.kotlin.K1Deprecation
 import org.jetbrains.kotlin.asJava.getRepresentativeLightMethod
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.lang.jvm.JvmModifier

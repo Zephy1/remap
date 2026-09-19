@@ -2,7 +2,11 @@
     CompilerConfiguration.Internals::class,
     K1Deprecation::class
 )
-@file:Suppress("DEPRECATION_ERROR")
+@file:Suppress(
+    "DEPRECATION_ERROR",
+    "OPT_IN_USAGE_ERROR",
+    "OPT_IN_USAGE_FUTURE_ERROR"
+)
 package com.replaymod.gradle.remap
 
 import com.replaymod.gradle.remap.legacy.LegacyMapping
