@@ -225,7 +225,7 @@ internal class PsiMapper(
         if (withIsPrefix) propertyName else "get" + propertyName.replaceFirstChar { it.uppercaseChar() }
 
     private fun map(expr: PsiElement, method: KtNamedFunction) {
-        val psiMethod = method.getRepresentativeLightMethod()
+        val psiMethod = method.findOverriddenJavaMethod()
         val mapped = findMapping(psiMethod ?: return)?.deobfuscatedName
         if (mapped != null && mapped != method.name) {
             replaceIdentifier(expr, mapped)
@@ -258,6 +258,13 @@ internal class PsiMapper(
 
     private fun FunctionDescriptor.findPsiInHierarchy() =
         overriddenTreeAsSequence(false).firstNotNullOfOrNull { it.findPsi() } as? PsiMethod
+
+    private fun KtNamedFunction.findOverriddenJavaMethod(): PsiMethod? {
+        val descriptor = bindingContext[BindingContext.FUNCTION, this] ?: return null
+        return descriptor.overriddenTreeAsSequence(false)
+            .mapNotNull { it.findPsi() as? PsiMethod }
+            .firstOrNull()
+    }
 
     private fun mapGetter(expr: PsiElement, property: SyntheticJavaPropertyDescriptor) {
         val getter = property.getMethod.findPsiInHierarchy() ?: return
@@ -489,7 +496,7 @@ internal class PsiMapper(
         when (resolved) {
             is PsiField -> map(expr, resolved)
             is PsiMethod -> map(expr, resolved)
-            is KtNamedFunction -> map(expr, resolved.getRepresentativeLightMethod())
+            is KtNamedFunction -> map(expr, resolved.findOverriddenJavaMethod())
             is PsiClass, is PsiPackage -> map(expr, resolved as PsiQualifiedNamedElement)
             is KtClassOrObject -> map(expr, resolved)
         }
@@ -499,7 +506,7 @@ internal class PsiMapper(
         return when (element) {
             is PsiField -> findMapping(element)?.deobfuscatedName
             is PsiMethod -> findMapping(element)?.deobfuscatedName
-            is KtNamedFunction -> findMappedName(element.getRepresentativeLightMethod() ?: return null)
+            is KtNamedFunction -> findMappedName(element.findOverriddenJavaMethod() ?: return null)
             else -> null
         }
     }

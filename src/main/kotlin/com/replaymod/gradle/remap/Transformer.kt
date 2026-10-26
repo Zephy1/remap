@@ -23,6 +23,7 @@ import org.jetbrains.kotlin.cli.jvm.compiler.NoScopeRecordCliBindingTrace
 import org.jetbrains.kotlin.cli.jvm.compiler.TopDownAnalyzerFacadeForJVM
 import org.jetbrains.kotlin.analyzer.AnalysisResult
 import org.jetbrains.kotlin.cli.common.config.KotlinSourceRoot
+import org.jetbrains.kotlin.cli.create
 import org.jetbrains.kotlin.cli.jvm.config.JavaSourceRoot
 import org.jetbrains.kotlin.cli.jvm.config.JvmClasspathRoot
 import org.jetbrains.kotlin.cli.jvm.modules.CoreJrtFileSystem
@@ -83,7 +84,7 @@ class Transformer(private val map: MappingSet) {
                 Files.write(processedPath, processedSource.toByteArray(), StandardOpenOption.CREATE)
             }
 
-            val config = CompilerConfiguration()
+            val config = CompilerConfiguration.create()
             config.put(CommonConfigurationKeys.MODULE_NAME, "main")
             jdkHome?.let {config.setupJdk(it) }
             config.add<ContentRoot>(CLIConfigurationKeys.CONTENT_ROOTS, JavaSourceRoot(tmpDir.toFile(), ""))
@@ -200,7 +201,7 @@ class Transformer(private val map: MappingSet) {
     }
 
     private fun setupRemappedProject(disposable: Disposable, classpath: Array<String>, sourceRoot: Path): KotlinCoreEnvironment {
-        val config = CompilerConfiguration()
+        val config = CompilerConfiguration.create()
         (remappedJdkHome ?: jdkHome)?.let { config.setupJdk(it) }
         config.put(CommonConfigurationKeys.MODULE_NAME, "main")
         config.addAll(CLIConfigurationKeys.CONTENT_ROOTS, classpath.map { JvmClasspathRoot(File(it)) })

@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
-    kotlin("jvm") version "2.4.20"
+    kotlin("jvm") version "2.4.21"
     `maven-publish`
 }
 
@@ -16,9 +16,9 @@ repositories {
 }
 
 dependencies {
-    api("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.4.20")
+    api("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.4.21")
     implementation(kotlin("stdlib"))
-    implementation("org.ow2.asm:asm-tree:9.10.1")
+    implementation("org.ow2.asm:asm-tree:9.11.1")
     api("org.cadixdev:lorenz:0.5.8")
     testRuntimeOnly("org.spongepowered:mixin:0.8.7")
 }
